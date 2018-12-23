@@ -6,7 +6,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="UnitType\" />
+    <Compile Remove="UnitType\**" />
+    <EmbeddedResource Remove="UnitType\**" />
+    <None Remove="UnitType\**" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="NullGuard.Fody" Version="1.8.5" />

@@ -1,17 +1,19 @@
 ﻿using System;
-
-abstract class Unit
+namespace Resort.Types.Units
 {
-    public string Title;
-    public string ShortTitle;
-    public string TitleParrental;
-    public string ShortTitleParrental;
-
-    protected Unit(string title, string shortTitle, string titleParrental, string shortTitleParrental)
+    abstract class Unit
     {
-        Title = title;
-        ShortTitle = shortTitle;
-        TitleParrental = titleParrental;
-        ShortTitleParrental = shortTitleParrental;
+        public string Title;
+        public string ShortTitle;
+        public string TitleParrental;
+        public string ShortTitleParrental;
+
+        protected Unit(string title, string shortTitle, string titleParrental, string shortTitleParrental)
+        {
+            Title = title;
+            ShortTitle = shortTitle;
+            TitleParrental = titleParrental;
+            ShortTitleParrental = shortTitleParrental;
+        }
     }
 }
