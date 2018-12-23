@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="UnitType\" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="NullGuard.Fody" Version="1.8.5" />
+    <PackageReference Include="Fody" Version="3.3.3" />
+  </ItemGroup>
+</Project>
