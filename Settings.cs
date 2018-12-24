@@ -1,4 +1,5 @@
 ﻿using Resort.Types;
+using Resort.Types.Units;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -7,8 +8,8 @@ namespace Resort
 {
     static class Settings
     {
-        public static Money startMoney = new Money(100_000);
-        public static Money targetMoney = new Money(1_000_000);
+        public static UnitValue startMoney = new UnitValue(100_000, Credits.Instance);
+        public static UnitValue targetMoney = new UnitValue(1_000_000, Credits.Instance);
         
         public static int StartAmountHotels = 1;
         public static int StartAmountRestaurants = 1;
