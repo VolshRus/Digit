@@ -10,9 +10,13 @@
     <Compile Remove="UnitType\**" />
     <EmbeddedResource Remove="UnitType\**" />
     <None Remove="UnitType\**" />
+    <Compile Remove="Types\Clients.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="NullGuard.Fody" Version="1.8.5" />
     <PackageReference Include="Fody" Version="3.3.3" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Types\Clients\" />
   </ItemGroup>
 </Project>

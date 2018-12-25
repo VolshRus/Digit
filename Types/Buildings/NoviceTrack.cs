@@ -1,18 +1,19 @@
-﻿using Resort.Types.Needs;
+﻿using Resort.Types.Clients;
+using Resort.Types.Needs;
 using Resort.Types.Units;
 
 namespace Resort.Types.Buildings
 {
-    internal class NoviceTrack : BuildingType
+    internal class NoviceTrack : BuildType
     {
         public static NoviceTrack Instance { get; } = new NoviceTrack();
 
         private NoviceTrack() : base(
-            title: $"Трасса для {Novices.Instance.TitleParrental}",
-            cost: new UnitValue(30_000, Credits.Instance),
-            upkeep: new UnitValue(10_000, Credits.Instance),
+            title: $"Трасса для {Novice.Instance.TitleParrental}",
+            cost: new Money(30_000),
+            upkeep: new Money(10_000),
             serviceType: NeedType.Track,
-            servicesData: new UnitValue(20, Novices.Instance))
+            clientsData: new NovicesAmount(20))
         { }
     }
 }

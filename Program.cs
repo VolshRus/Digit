@@ -1,180 +1,31 @@
 ﻿using NullGuard;using Resort.Buildings;
+using Resort.Types;
 using Resort.Types.Buildings;
+using Resort.Types.Clients;
 using Resort.Types.Needs;
 using Resort.Types.Units;
 using System;using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
-using System.Linq;
-[assembly: NullGuard(ValidationFlags.All)]namespace Resort{    static class Extensions
-    {
-        public static IEnumerable<T> ForEach<T>(this IEnumerable<T> list, Action<T> action)
-        {
-            foreach(var item in list)
-            {
-                action.Invoke(item);
-            }
-            return list;
-        }
-        public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> list)
-        {
-            var randomised = list.Select(item => new { item, order = rnd.Next() })
-                .OrderBy(x => x.order)
-                .Select(x => x.item)
-                .ToList();
+using System.Linq;using System.Reflection;
+using System.Runtime.InteropServices;
 
-            return randomised;
-        }
-        static Random rnd = new Random();
-    }    class BuildManager
-    {
-        public IReadOnlyCollection<BuildingType> AvailableBuildings => _availableBuildings;
-        public bool CanBuild => _buildsCount < _buildPerTurn;
-        public UnitValue Upkeep => _buildings.Select(t => t.Upkeep).Aggregate((t1, t2) => t1 + t2);
-        public BuildManager()
-        {
-            Initialize();
-        }
-        public int GetBuildingsAmount(BuildingType buildingType) => _buildings.Count(b => b.Title == buildingType.Title);
-        public int MinimalService(Visitor visitor)
-        {
-            var a = Enum.GetValues(typeof(NeedType))
-                .Cast<NeedType>()
-                .Select(t => GetServiceAmount(t, visitor));
-             return a.Min();
-        }
-        public int GetServiceAmount(NeedType needType, Visitor visitorType)
-        {
-            return _buildings
-                .SelectMany(t => t.Services)
-                .Where(t => t.NeedType == needType && (visitorType == t._visitorType || visitorType.GetType().IsSubclassOf(t._visitorType.GetType())))
-                .Select(t => t.ServicedMax)
-                .Sum();
-        }
-        public string GetServiceDescription(BuildingType buildingType)
-        {
-            return buildingType.ServiceVolume
-                .Select(t => new UnitValue(t.Value * GetBuildingsAmount(buildingType), t.Unit).ToString())
-                .Aggregate((t1, t2) => t1 + " и " + t2);
-        }
-        public void Build(BuildingType type)
-        {
-            _buildings.Add(new Building(type));
-            _buildsCount++;
-        }
-        public IReadOnlyCollection<Service> GetServices() => _buildings.SelectMany(t => t.Services) as IReadOnlyCollection<Service>;
-        public void Initialize()
-        {
-            _availableBuildings.Add(Hotel.Instance);
-            _availableBuildings.Add(Restaurant.Instance);
-            _availableBuildings.Add(NoviceTrack.Instance);
-            _availableBuildings.Add(CommonTrack.Instance);
-            _availableBuildings.Add(ProTrack.Instance);
-            _availableBuildings.Add(Chairlift.Instance);
-            _availableBuildings.Add(Cabinlift.Instance);
-
-            _buildings.Add(new Building(Hotel.Instance));
-            _buildings.Add(new Building(Hotel.Instance));
-            _buildings.Add(new Building(CommonTrack.Instance));
-            _buildings.Add(new Building(CommonTrack.Instance));
-            _buildings.Add(new Building(Restaurant.Instance));
-            _buildings.Add(new Building(NoviceTrack.Instance));
-            _buildings.Add(new Building(Chairlift.Instance));
-
-        }
-        int _buildsCount = 0;
-        int _buildPerTurn = 2;
-        List<Building> _buildings = new List<Building>();
-        List<BuildingType> _availableBuildings = new List<BuildingType>();
-    }    class ClientManager
-    {
-        public ClientManager()
-        {
-            InitializeClients();
-        }
-
-        public UnitValue GetRent() => _clients.Select(t => t.Rent).Aggregate((t1, t2) => t1 + t2);
-        public IEnumerable<Client> ClientsByType(Visitor visitor) => _clients.Where(t => t.Unit == visitor);
-
-        public void ClientsArrive(int amount, Visitor type)
-        {
-            for (int i = 0; i < amount; i++)
-            {
-                _clients.Add(new NoviceClient());
-            }
-        }
-
-        public void ClientsLeave(int amount, Visitor type)
-        {
-            var leavingClients = _clients.Where(t => t.Unit == type).TakeLast(amount);
-            _clientsLeaved.AddRange(leavingClients);
-            leavingClients.ForEach(t => _clients.Remove(t));
-        }
-
-        private void InitializeClients()
-        {
-            for (int i=0;i< _novicesOnStart; i++)
-            {
-                _clients.Add(new NoviceClient());
-            }
-            for (int i=0;i< _proOnStart; i++)
-            {
-                _clients.Add(new ProClient());
-            }
-        }
-
-        List<Client> _clients = new List<Client>();
-        List<Client> _clientsLeaved = new List<Client>();
-        List<Client> _clientsArrived = new List<Client>();
-
-        int _novicesOnStart = 20;
-        int _proOnStart = 0;
-
-    }    abstract class Client
-    {
-        public abstract UnitValue Rent { get; }
-        public abstract UnitValue RatingDecrease { get; }
-        public abstract int StayDaysLeft { get; }
-        public abstract Unit Unit { get; }
-        public bool Satisfied => _needs.All(t => t.Satisfied);
-        protected Client()
-        {
-            _needs.Add(new FoodNeed());
-            _needs.Add(new RoomNeed());
-            _needs.Add(new TrackNeed());
-            _needs.Add(new ElevatorNeed());
-        }
-        public UnitValue PayRent()
-        {
-            _needs.ForEach(t => t.Refresh());
-            return Rent;
-        }
-        protected List<Need> _needs = new List<Need>();
-        protected static readonly Random random = new Random();
-    }    class ProClient:Client
-    {
-        public override UnitValue Rent => new UnitValue(6000, Credits.Instance);
-        public override UnitValue RatingDecrease => new UnitValue(2, Percents.Instance);
-        public override int StayDaysLeft => random.Next(1, 10);
-        public override Unit Unit => Pro.Instance;
-
-    }    class NoviceClient:Client
-    {
-        public override UnitValue Rent => new UnitValue(2000, Credits.Instance);
-        public override UnitValue RatingDecrease => new UnitValue(1, Percents.Instance);
-        public override int StayDaysLeft => random.Next(1, 6);
-        public override Unit Unit => Novices.Instance;
-    }    internal interface IAction
+[assembly: NullGuard(ValidationFlags.All)]namespace Resort{    class Game    {        public void AngryCheckOut()
+        {            ClientType novice = NoviceClientType.Instance;            ClientType pro = ProClientType.Instance;            int novicesAmount = ClientManager.ClientsByType(novice).Count();            int proAmount = ClientManager.ClientsByType(pro).Count();            int clientsAmount = ClientManager.ClientsAmount;            int servicedNovices = BuildManager.MinimalService(novice);
+            int servicedPro = BuildManager.MinimalService(pro);            int servicedClients = BuildManager.MinimalService();
+            ClientManager.ClientsLeave(novicesAmount - servicedNovices, novice, true);            ClientManager.ClientsLeave(proAmount - servicedPro, pro, true);
+            ClientManager.ClientsLeave(clientsAmount - servicedClients, true);            Rating -= ClientManager.RatingDecreaseByLeavers();
+        }        public DateTime Today => new DateTime(3029, 12, 31).AddDays(Turn);        public BuildManager BuildManager = new BuildManager();        public ClientManager ClientManager = new ClientManager();        public Chance Rating { get; private set; } = new Chance(44);        public Chance RatingDecreasePerTurn { get; private set; } = new Chance(10);        public Money PromoCost => _promoStepCost * _promoMultiplier;        public Chance PromoRating => _promoIncreasePerMultiplier * _promoMultiplier;        public int LeavingClientsByType(ClientType clientType) => Math.Max(0, ClientManager.ClientsByType(clientType).Count() - BuildManager.MinimalService(clientType));        public Money Money { get; private set; } = new Money(100_000);        private int _promoMultiplier;        private int Turn;        private Chance _promoIncreasePerMultiplier = new Chance(5);        private Money _promoStepCost = new Money(10_000);    }    internal interface IAction
     {
         IAction Do();
     }
 
     internal class Action : IAction
     {
-       public IAction Do() { return new Action(); }
+        public IAction Do() { return new Action(); }
     }
 
-    class ShowAction:IAction
+    class ShowAction : IAction
     {
         public ShowAction(IView view)
         {
@@ -188,7 +39,7 @@ using System.Linq;
 
         IView _shownView;
     }
-    class BuildAction:IAction
+    class BuildAction : IAction
     {
         public IAction Do() { return new BuildAction(); }
     }
@@ -196,7 +47,7 @@ using System.Linq;
     {
         IAction GetAction();
     }
-    class BuildView:IView
+    class BuildView : IView
     {
         public BuildView()
         {
@@ -215,7 +66,7 @@ using System.Linq;
             _availableBuildings.ForEach(t => menu.AddItem(t.Description, new BuildAction()));
             return menu.Build().GetAction();
         }
-        List<BuildingType> _availableBuildings = new List<BuildingType>();
+        List<BuildType> _availableBuildings = new List<BuildType>();
     }
     class MenuBuilder
     {
@@ -231,7 +82,7 @@ using System.Linq;
         }
         private List<(string, IAction)> _list = new List<(string, IAction)>();
     }
-    internal class MenuView:IView
+    internal class MenuView : IView
     {
         public MenuView(IReadOnlyCollection<(string, IAction)> items)
         {
@@ -281,7 +132,7 @@ using System.Linq;
         private List<(string, IAction)> _list = new List<(string, IAction)>();
     }
 
-    internal class TurnStartView:IView
+    internal class TurnStartView : IView
     {
         public TurnStartView(Game g)
         {
@@ -289,11 +140,11 @@ using System.Linq;
         }
         public void ShowTable(string[,] rows)
         {
-            int[] MaxWidth = new int[rows.GetUpperBound(1)+1];
-            for (int i=0;i<MaxWidth.Length;i++)
+            int[] MaxWidth = new int[rows.GetUpperBound(1) + 1];
+            for (int i = 0; i < MaxWidth.Length; i++)
             {
-                int Max = rows[0,i].Length;
-                for (int j=1;j<rows.GetUpperBound(0);j++)
+                int Max = rows[0, i].Length;
+                for (int j = 1; j < rows.GetUpperBound(0); j++)
                 {
                     if (rows[j, i].Length > Max) Max = rows[j, i].Length;
                 }
@@ -303,7 +154,7 @@ using System.Linq;
             {
                 for (int j = 0; j < MaxWidth.Length; j++)
                 {
-                    if (j==0) Console.Write(rows[i,j].PadRight(MaxWidth[j] + 10));
+                    if (j == 0) Console.Write(rows[i, j].PadRight(MaxWidth[j] + 10));
                     else Console.Write(rows[i, j].PadLeft(MaxWidth[j] + 10));
 
                 }
@@ -319,7 +170,7 @@ using System.Linq;
             {
                 {"Деньги, прогноз на завтра","ДЕБЕТ", "КРЕДИТ"},
                 {"Средств на счету:", _game.Money, ""},
-                {"Туристы:", _game.ClientManager.GetRent(), ""},
+                {"Туристы:", _game.ClientManager.Rent, ""},
                 {"Содержание зданий:", "",_game.BuildManager.Upkeep},
                 {"Реклама:","",_game.PromoCost },
                 {"Строительство","","" },
@@ -334,8 +185,8 @@ using System.Linq;
                 {"Рейтинг, прогноз на завтра","Снижение", "Увеличение"},
                 {"Текущий рейтинг:","", _game.Rating},
                 {"Реклама:", "", _game.PromoRating},
-                {"Недовольные новички:",_game.LeavingClientsByType(Novices.Instance).ToString(),""},
-                {"Недовольные профи",_game.LeavingClientsByType(Pro.Instance).ToString(),"" },
+                {"Недовольные новички:",_game.LeavingClientsByType(NoviceClientType.Instance).ToString(),""},
+                {"Недовольные профи",_game.LeavingClientsByType(ProClientType.Instance).ToString(),"" },
                 {"Естественное снижение",_game.RatingDecreasePerTurn,"" },
                 {"Итого:","","" }
             };
@@ -347,12 +198,12 @@ using System.Linq;
             {
                 {"Посетители, отчет", "Уехало довольных", "Уехало недовольных", "Приехало", "Итого"},
                 {"Новички:","", "","",""},
-                {"Профи:", "", "","",""},
+                {"Профи:", "", "","",""}
             };
 
             ShowTable(clientsTable);
             Console.WriteLine();
-            
+
             //Console.WriteLine();
             //Console.WriteLine($"Уехало довольных     Уехало недовольных         Приехало");
             //Console.WriteLine($"Новичков: сейчас 30 (уехало 10, приехало 8)");
@@ -366,29 +217,11 @@ using System.Linq;
         }
         Game _game;
     }
-    class Game
-    {
-        public DateTime Today => new DateTime(3029, 12, 31).AddDays(Turn);
-        public BuildManager BuildManager = new BuildManager();
-        public ClientManager ClientManager = new ClientManager();
 
-        public UnitValue Rating { get; private set; } = new UnitValue(44, Percents.Instance);
-        public UnitValue RatingDecreasePerTurn { get; private set; } = new UnitValue(10, Percents.Instance);
+    internal class Program    {        [DllImport("libc")]        private static extern int system(string exec);
 
-        public UnitValue PromoCost => _promoStepCost * _promoMultiplier;
-        public UnitValue PromoRating => _promoIncreasePerMultiplier * _promoMultiplier;
-        public int LeavingClientsByType(Visitor type) => Math.Max(0, ClientManager.ClientsByType(type).Count() - BuildManager.MinimalService(type));
-        public UnitValue Money { get; private set; } = new UnitValue(100_000, Credits.Instance);
-        
-
-        private int _promoMultiplier = 0;
-        private int Turn = 0;
-        private UnitValue _promoIncreasePerMultiplier = new UnitValue(5, Percents.Instance);
-        private UnitValue _promoStepCost = new UnitValue(10_000, Credits.Instance);
-
-    }
-    internal class Program    {        private static void Main(string[] args)        {
-
+        private static void Main(string[] args)        {
+            system(@"printf '\e[8;26;150t'");
             //         var subclassTypes = Assembly
             //.GetAssembly(typeof(BuildingType))
             //.GetTypes()
@@ -401,7 +234,6 @@ using System.Linq;
             //}
             BuildManager bm = new BuildManager();
             Game g = new Game();
-            g.ClientManager.ClientsLeave(10, Pro.Instance);
             TurnStartView view = new TurnStartView(g);
             IAction action = view.GetAction();            while (true)
             {

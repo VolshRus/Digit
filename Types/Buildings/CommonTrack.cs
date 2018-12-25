@@ -1,19 +1,20 @@
-﻿using Resort.Types.Needs;
+﻿using Resort.Types.Clients;
+using Resort.Types.Needs;
 using Resort.Types.Units;
 
 namespace Resort.Types.Buildings
 {
-    internal class CommonTrack : BuildingType
+    internal class CommonTrack : BuildType
     {
         public static CommonTrack Instance { get; } = new CommonTrack();
 
         private CommonTrack() : base(
             "Обычная трасса",
-             new UnitValue(45_000, Credits.Instance),
-             new UnitValue(15_000, Credits.Instance),
-             NeedType.Elevator,
-             new UnitValue(10, Novices.Instance),
-             new UnitValue(10, Pro.Instance)
+             new Money(45_000),
+             new Money(15_000),
+             NeedType.Track,
+             new NovicesAmount(10),
+             new ProAmount(10)
         )
         { }
 

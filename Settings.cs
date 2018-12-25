@@ -8,9 +8,10 @@ namespace Resort
 {
     static class Settings
     {
+        /*
         public static UnitValue startMoney = new UnitValue(100_000, Credits.Instance);
         public static UnitValue targetMoney = new UnitValue(1_000_000, Credits.Instance);
-        
+
         public static int StartAmountHotels = 1;
         public static int StartAmountRestaurants = 1;
         public static int StartAmountNoviceTrack = 1;
@@ -24,7 +25,7 @@ namespace Resort
 
         public static int BuildsPerTurn = 2;
 
-
+        */
 
 
 

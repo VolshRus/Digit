@@ -1,18 +1,19 @@
-﻿using Resort.Types.Needs;
+﻿using Resort.Types.Clients;
+using Resort.Types.Needs;
 using Resort.Types.Units;
 
 namespace Resort.Types.Buildings
 {
-    internal class ProTrack : BuildingType
+    internal class ProTrack : BuildType
     {
         public static ProTrack Instance { get; } = new ProTrack();
 
         private ProTrack() : base(
             title: $"Трасса для {Pro.Instance.TitleParrental}",
-            cost: new UnitValue(60_000, Credits.Instance),
-            upkeep: new UnitValue(20_000, Credits.Instance),
+            cost: new Money(60_000),
+            upkeep: new Money(20_000),
             serviceType: NeedType.Track,
-            servicesData: new UnitValue(20, Pro.Instance))
+            clientsData: new ProAmount(20))
         { }
     }
 }
