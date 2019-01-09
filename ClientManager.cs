@@ -81,7 +81,7 @@ namespace Resort
         List<Client> _clientsArrived = new List<Client>();
 
         readonly int _novicesOnStart = 20;
-        readonly int _proOnStart = 0;
+        readonly int _proOnStart = 4;
 
     }
 }

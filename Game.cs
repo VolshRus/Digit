@@ -58,7 +58,7 @@ namespace Resort
 
         }
 
-        public DateTime Today => new DateTime(3029, 12, 31).AddDays(Turn);
+        public DateTime Today => new DateTime(3030, 01, 01).AddDays(Turn);
         public BuildManager BuildManager = new BuildManager();
         public ClientManager ClientManager = new ClientManager();
 
