@@ -11,8 +11,8 @@ namespace Resort.Types.Clients
         public ClientType ClientType { get; }
         public Money Rent { get; }
         public Chance RatingDecrease { get; }
-        public Duration Lasting { get; private set; }
         public Unit Unit { get; }
+        public Duration Lasting { get; set; }
         public bool Satisfied => _needs.All(t => t.Satisfied);
         public Client(ClientType type)
         {

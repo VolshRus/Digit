@@ -18,5 +18,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Types\Clients\" />
+    <Folder Include="Views\" />
+    <Folder Include="Actions\" />
   </ItemGroup>
 </Project>

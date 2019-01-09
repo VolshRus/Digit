@@ -8,9 +8,9 @@ using System.Text;
 
 namespace Resort
 {
-    internal class Service    {        public NeedType NeedType;
+    abstract class Service    {        public NeedType NeedType;
         public int ServicedMax { get; private set; }
-        public Service(NeedType needType, int servicedMax)
+        protected Service(NeedType needType, int servicedMax)
         {
             NeedType = needType;
             ServicedMax = servicedMax;
@@ -20,6 +20,12 @@ namespace Resort
         {
             return ServicedMax + " " + Visitor.Instance.ShortTitleParrental;
         }    }
+    class CommonService : Service
+    {
+        public CommonService(NeedType needType, int servicedMax)
+            : base(needType, servicedMax)
+        { }
+    }
     class SpecialService : Service
     {
         public readonly ClientType ClientType;

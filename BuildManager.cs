@@ -12,7 +12,7 @@ namespace Resort
     class BuildManager
     {
         public IReadOnlyCollection<BuildType> AvailableBuildings => _availableBuildings;
-        public bool CanBuild => _buildsCount < _buildPerTurn;
+        public int CanBuild => _buildPerTurn - _buildsCount;
         public Money Upkeep => _buildings.Select(t => t.Upkeep).Sum();
 
         public BuildManager()
@@ -22,25 +22,28 @@ namespace Resort
 
         public int MinimalService()
         {
-            var a = Enum.GetValues(typeof(NeedType))
+            List<NeedType> except = new List<NeedType>();
+            except.Add(NeedType.Track);
+            return Enum.GetValues(typeof(NeedType))
                 .Cast<NeedType>()
-                .Select(t => ServicedClients(t).Value);
-            return a.Min();
+                .Except(except)
+                .Select(t => ServicedClients(t).Value)
+                .Min();
         }
 
         public int MinimalService(ClientType clientType)
         {
-            var a = Enum.GetValues(typeof(NeedType))
+            return Enum.GetValues(typeof(NeedType))
                 .Cast<NeedType>()
-                .Select(t => ServicedClients(clientType, t).Value + ServicedClients(t).Value);
-            return a.Min();
+                .Select(t => ServicedClients(clientType, t).Value + ServicedClients(t).Value)
+                .Min();
         }
 
         private ClientsAmount ServicedClients(NeedType needType)
         {
             return _buildings
                 .SelectMany(t => t.Services)
-                .Where(t => !t.GetType().IsSubclassOf(typeof(Service)))
+                .Where(t => t is CommonService)
                 .Where(t => t.NeedType == needType)
                 .Select(t => new ClientsAmount(t.ServicedMax))
                 .Append(new ClientsAmount(0))
@@ -51,8 +54,8 @@ namespace Resort
             return _buildings
                 .SelectMany(t => t.Services)
                 .Where(t => t is SpecialService)
-                .Where(t => t.NeedType == needType)
                 .Cast<SpecialService>()
+                .Where(t => t.NeedType == needType)
                 .Where(t => t.ClientType == clientType)
                 .Select(t => clientType.CreateClients(t.ServicedMax))
                 .Append(clientType.CreateClients(0))
@@ -70,6 +73,11 @@ namespace Resort
             _buildsCount++;
         }
 
+        public void NextTurn()
+        {
+            _buildsCount = 0;
+        }
+
         public void Initialize()
         {
             _availableBuildings.Add(Hotel.Instance);
@@ -81,11 +89,8 @@ namespace Resort
             _availableBuildings.Add(Cabinlift.Instance);
 
             _buildings.Add(new Building(Hotel.Instance));
-            _buildings.Add(new Building(Hotel.Instance));
-            _buildings.Add(new Building(CommonTrack.Instance));
             _buildings.Add(new Building(CommonTrack.Instance));
             _buildings.Add(new Building(Restaurant.Instance));
-            _buildings.Add(new Building(NoviceTrack.Instance));
             _buildings.Add(new Building(Chairlift.Instance));
 
         }

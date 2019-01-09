@@ -14,7 +14,7 @@ namespace Resort.Types.Clients
 
         public virtual Service CreateService(NeedType needTypes)
         {
-            return new Service(needTypes, Value);
+            return new CommonService(needTypes, Value);
         }
 
         public virtual ClientsAmount Add(ClientsAmount another)

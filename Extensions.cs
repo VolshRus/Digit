@@ -10,12 +10,12 @@ namespace Resort
     {
         public static Money Sum(this IEnumerable<Money> source)
         {
-            return source.Aggregate((x, y) => x + y);
+            return source.Aggregate(new Money(0), (x, y) => x + y);
         }
 
         public static Chance Sum(this IEnumerable<Chance> source)
         {
-            return source.Aggregate((x, y) => x + y);
+            return source.Aggregate(new Chance(0), (x, y) => x + y);
         }
 
         public static ClientsAmount Sum(this IEnumerable<ClientsAmount> source)
