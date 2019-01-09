@@ -62,7 +62,7 @@ namespace Resort.Views
                 {"Недовольные новички:",_game.LeavingClientsByType(NoviceClientType.Instance).ToString(),""},
                 {"Недовольные профи",_game.LeavingClientsByType(ProClientType.Instance).ToString(),"" },
                 {"Естественное снижение",_game.RatingDecreasePerTurn,"" },
-                {"Итого:","","" }
+                {"Итого:","",_game.Rating+_game.PromoRating - _game.LeavingClientsByType(NoviceClientType.Instance)*NoviceClientType.Instance.RatingDecrease - _game.LeavingClientsByType(ProClientType.Instance) *ProClientType.Instance.RatingDecrease - _game.RatingDecreasePerTurn}
             };
 
             ShowTable(promoTable);
